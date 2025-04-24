@@ -10,6 +10,7 @@ type SearchHit = {
     page_number: string;
     pdf_url?: string;
     pdf_path?: string;
+    gcs_path?: string; // ✅ Fix: added this line
   };
   highlight?: {
     text?: string[];
@@ -32,7 +33,6 @@ export default function Home() {
   const [selectedResultIndex, setSelectedResultIndex] = useState<number | null>(null);
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
 
-  // Perform a default search on first load
   useEffect(() => {
     const runDefaultSearch = async () => {
       const defaultQuery = "رادیو";
@@ -47,7 +47,6 @@ export default function Home() {
         setCurrentPdfUrl(data[0]._source.pdf_url || null);
       }
     };
-
     runDefaultSearch();
   }, []);
 
