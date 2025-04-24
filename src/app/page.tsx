@@ -10,6 +10,7 @@ type SearchHit = {
     page_number: string;
     pdf_url?: string;
     pdf_path?: string;
+    gcs_path: string; // ✅ added to allow navigation logic
   };
   highlight?: {
     text?: string[];
