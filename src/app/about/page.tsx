@@ -9,7 +9,7 @@ export default function AboutPage() {
             It is entirely self-funded and non-commercial, intended solely for scholarly use.
           </p>
           <p className="mb-4">
-            As interest grows in Iran's modern history, especially in the Pahlavi period, these digitised periodicals offer a vast, underutilised archive 
+            As interest grows in Iran&apos;s modern history, especially in the Pahlavi period, these digitised periodicals offer a vast, underutilised archive 
             for rethinking, rewriting, and revising our understanding of the era.
           </p>
           <p className="mb-4">
