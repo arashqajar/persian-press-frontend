@@ -30,7 +30,7 @@ export default function RootLayout({
         <header className="flex justify-between items-center p-4 border-b border-zinc-700">
           <h1 className="text-xl font-bold">📰 Pahlavi Persian Press</h1>
           <nav className="flex gap-6 text-sm text-zinc-300">
-            <a href="#">About</a>
+            <a href="/about">About</a>
             <a href="#">Help</a>
             <a href="#">Publication Titles</a>
           </nav>
