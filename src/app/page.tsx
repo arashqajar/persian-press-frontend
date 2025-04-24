@@ -10,6 +10,7 @@ type SearchHit = {
     page_number: string;
     pdf_url?: string;
     pdf_path?: string;
+    gcs_path?: string;
   };
   highlight?: {
     text?: string[];
@@ -26,15 +27,16 @@ function getNextPdfUrl(currentPath: string, offset: number): string | null {
   return `${folder}${nextPage}.pdf`;
 }
 
-function formatMetadata(path: string, publication: string): string {
-  const filename = path.split("/").pop() || "";
-  const cleanPub = publication.replace("_OCR", "").replace(/_/g, " ");
-
-  const match = filename.match(/Year_(\d+)_No_(\d+)_([A-Za-z]+)_(\d{4})_(\d+)_ocr/);
-  if (!match) return cleanPub;
-
-  const [, year, no, month, yearNum, page] = match;
-  return `${cleanPub} – Year ${year}, No. ${no}, ${month} ${yearNum}, page ${page}`;
+function formatMetadata(gcsPath?: string): string {
+  if (!gcsPath) return "";
+  const parts = gcsPath.split("/");
+  const publicationRaw = parts[0].replace("_OCR", "").replace("_", " ");
+  const issueRaw = parts.find((p) =>
+    /^Year_\d+_No_\d+/.test(p)
+  );
+  const pageMatch = gcsPath.match(/_(\d+)_ocr\.docx$/);
+  const page = pageMatch ? pageMatch[1] : "";
+  return `${publicationRaw} – ${issueRaw?.replaceAll("_", " ")}, page ${page}`;
 }
 
 export default function Home() {
@@ -42,10 +44,12 @@ export default function Home() {
   const [results, setResults] = useState<SearchHit[]>([]);
   const [selectedResult, setSelectedResult] = useState<SearchHit | null>(null);
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
+  const [expandedResultIndex, setExpandedResultIndex] = useState<number | null>(null);
 
   const handleSearch = async () => {
     setSelectedResult(null);
     setCurrentPdfUrl(null);
+    setExpandedResultIndex(null);
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(query)}`
     );
@@ -103,33 +107,35 @@ export default function Home() {
         <div>
           <h2 className="text-xl mb-2">📃 Search Results</h2>
           {results.length === 0 && <p>No results yet. Try a search above.</p>}
-          {results.map((result, idx) => (
-            <div
-              key={idx}
-              onClick={() => {
-                setSelectedResult(result);
-                setCurrentPdfUrl(result._source.pdf_url || null);
-              }}
-              className={`mb-4 p-4 border border-zinc-700 rounded bg-zinc-800 cursor-pointer hover:border-blue-500 transition ${
-                selectedResult === result ? "border-blue-500" : ""
-              }`}
-            >
+          {results.map((result, idx) => {
+            const isExpanded = expandedResultIndex === idx;
+            const displayText = isExpanded
+              ? result._source.text
+              : result.highlight?.text?.[0] ?? result._source.text.slice(0, 250) + "...";
+
+            return (
               <div
-                className="text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    result.highlight?.text?.[0]
-                      ?.replace(
-                        new RegExp(query, "gi"),
-                        (match) => `<mark class="bg-yellow-400 text-black">${match}</mark>`
-                      ) ?? result._source.text,
+                key={idx}
+                onClick={() => {
+                  setSelectedResult(result);
+                  setCurrentPdfUrl(result._source.pdf_url || null);
+                  setExpandedResultIndex(expandedResultIndex === idx ? null : idx);
                 }}
-              />
-              <p className="text-xs mt-3 text-zinc-400 italic">
-                {formatMetadata(result._source.pdf_path || "", result._source.publication)}
-              </p>
-            </div>
-          ))}
+                className={`mb-4 p-4 border border-zinc-700 rounded bg-zinc-800 cursor-pointer hover:border-blue-500 transition ${
+                  selectedResult === result ? "border-blue-500" : ""
+                }`}
+              >
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: displayText,
+                  }}
+                />
+                <p className="text-sm mt-2 text-zinc-400">
+                  {formatMetadata(result._source.gcs_path)}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
         <div>
