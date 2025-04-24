@@ -10,7 +10,6 @@ type SearchHit = {
     page_number: string;
     pdf_url?: string;
     pdf_path?: string;
-    gcs_path: string; // ✅ added to allow navigation logic
   };
   highlight?: {
     text?: string[];
@@ -25,6 +24,17 @@ function getNextPdfUrl(currentPath: string, offset: number): string | null {
   const currentPage = parseInt(match[2], 10);
   const nextPage = currentPage + offset;
   return `${folder}${nextPage}.pdf`;
+}
+
+function formatMetadata(path: string, publication: string): string {
+  const filename = path.split("/").pop() || "";
+  const cleanPub = publication.replace("_OCR", "").replace(/_/g, " ");
+
+  const match = filename.match(/Year_(\d+)_No_(\d+)_([A-Za-z]+)_(\d{4})_(\d+)_ocr/);
+  if (!match) return cleanPub;
+
+  const [, year, no, month, yearNum, page] = match;
+  return `${cleanPub} – Year ${year}, No. ${no}, ${month} ${yearNum}, page ${page}`;
 }
 
 export default function Home() {
@@ -105,13 +115,18 @@ export default function Home() {
               }`}
             >
               <div
+                className="text-sm leading-relaxed"
                 dangerouslySetInnerHTML={{
-                  __html: result.highlight?.text?.[0] ?? result._source.text,
+                  __html:
+                    result.highlight?.text?.[0]
+                      ?.replace(
+                        new RegExp(query, "gi"),
+                        (match) => `<mark class="bg-yellow-400 text-black">${match}</mark>`
+                      ) ?? result._source.text,
                 }}
               />
-              <p className="text-sm mt-2 text-zinc-400">
-                {result._source.publication} / {result._source.issue_folder} / Page{" "}
-                {result._source.page_number}
+              <p className="text-xs mt-3 text-zinc-400 italic">
+                {formatMetadata(result._source.pdf_path || "", result._source.publication)}
               </p>
             </div>
           ))}
