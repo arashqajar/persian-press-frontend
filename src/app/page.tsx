@@ -27,32 +27,51 @@ function getNextPdfUrl(currentPath: string, offset: number): string | null {
 }
 
 export default function Home() {
-  const [query, setQuery] = useState("رادیو"); // Set default query
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
-  const [selectedResult, setSelectedResult] = useState<SearchHit | null>(null);
+  const [selectedResultIndex, setSelectedResultIndex] = useState<number | null>(null);
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string | null>(null);
 
-  const handleSearch = async (inputQuery = query) => {
-    setSelectedResult(null);
+  // Perform a default search on first load
+  useEffect(() => {
+    const runDefaultSearch = async () => {
+      const defaultQuery = "رادیو";
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(defaultQuery)}`
+      );
+      const data = await res.json();
+      setQuery(defaultQuery);
+      setResults(data);
+      if (data.length > 0) {
+        setSelectedResultIndex(0);
+        setCurrentPdfUrl(data[0]._source.pdf_url || null);
+      }
+    };
+
+    runDefaultSearch();
+  }, []);
+
+  const handleSearch = async () => {
+    setSelectedResultIndex(null);
     setCurrentPdfUrl(null);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(inputQuery)}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(query)}`
     );
     const data = await res.json();
     setResults(data);
     if (data.length > 0) {
-      setSelectedResult(data[0]);
+      setSelectedResultIndex(0);
       setCurrentPdfUrl(data[0]._source.pdf_url || null);
     }
   };
 
-  useEffect(() => {
-    handleSearch("رادیو"); // Trigger default search on page load
-  }, []);
-
   const navigatePdf = (offset: number) => {
-    if (!selectedResult || !selectedResult._source.pdf_path) return;
-    const nextPath = getNextPdfUrl(selectedResult._source.pdf_path, offset);
+    if (
+      selectedResultIndex === null ||
+      !results[selectedResultIndex]?._source.pdf_path
+    )
+      return;
+    const nextPath = getNextPdfUrl(results[selectedResultIndex]._source.pdf_path!, offset);
     if (nextPath) {
       fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/signed-url?blob_name=${encodeURIComponent(nextPath)}`
@@ -64,9 +83,18 @@ export default function Home() {
     }
   };
 
+  const extractMetadata = (docxPath: string) => {
+    const parts = docxPath.split("/");
+    const issue = parts.find((p) => p.includes("Year_"));
+    const filename = parts.at(-1) || "";
+    const match = filename.match(/(\d+)_ocr/);
+    const page = match ? match[1] : "";
+    const publication = parts[0].replace("_OCR", "").replace("_", " ");
+    return `${publication} – ${issue?.replace(/_/g, " ")}, page ${page}`;
+  };
+
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-8">
-      {/* Static info */}
       <section className="mb-8 text-center">
         <h1 className="text-4xl font-bold mb-2">Pahlavi Persian Press</h1>
         <p className="text-base text-zinc-400">
@@ -77,7 +105,6 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Search bar */}
       <div className="flex gap-4 mb-6">
         <input
           type="text"
@@ -87,43 +114,46 @@ export default function Home() {
           className="w-full p-3 rounded bg-zinc-800 border border-zinc-700"
         />
         <button
-          onClick={() => handleSearch()}
+          onClick={handleSearch}
           className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
         >
           Search
         </button>
       </div>
 
-      {/* Results + Preview */}
       <div className="grid grid-cols-2 gap-8">
         <div>
           <h2 className="text-xl mb-2">📃 Search Results</h2>
           {results.length === 0 && <p>No results yet. Try a search above.</p>}
-          {results.map((result, idx) => (
-            <div
-              key={idx}
-              onClick={() => {
-                setSelectedResult(result);
-                setCurrentPdfUrl(result._source.pdf_url || null);
-              }}
-              className={`mb-4 p-4 border border-zinc-700 rounded bg-zinc-800 cursor-pointer hover:border-blue-500 transition ${
-                selectedResult === result ? "border-blue-500" : ""
-              }`}
-            >
+          {results.map((result, idx) => {
+            const isSelected = selectedResultIndex === idx;
+            const textToShow = isSelected
+              ? result._source.text
+              : result.highlight?.text?.[0] ?? result._source.text;
+
+            return (
               <div
-                dangerouslySetInnerHTML={{
-                  __html: result.highlight?.text?.[0] ?? result._source.text,
+                key={idx}
+                onClick={() => {
+                  setSelectedResultIndex(idx);
+                  setCurrentPdfUrl(result._source.pdf_url || null);
                 }}
-              />
-              <p className="text-sm mt-2 text-zinc-400">
-                {result._source.publication} / {result._source.issue_folder} / Page{" "}
-                {result._source.page_number}
-              </p>
-            </div>
-          ))}
+                className={`mb-4 p-4 border rounded cursor-pointer bg-zinc-800 transition ${
+                  isSelected ? "border-blue-500" : "border-zinc-700 hover:border-blue-500"
+                }`}
+              >
+                <div
+                  className="text-sm"
+                  dangerouslySetInnerHTML={{ __html: textToShow }}
+                />
+                <p className="text-sm mt-2 text-zinc-400">
+                  {extractMetadata(result._source.gcs_path || "")}
+                </p>
+              </div>
+            );
+          })}
         </div>
 
-        {/* PDF + Expanded */}
         <div>
           <h2 className="text-xl mb-2">📄 PDF Preview</h2>
           {currentPdfUrl && (
@@ -147,19 +177,6 @@ export default function Home() {
                   Next ▶
                 </button>
               </div>
-            </div>
-          )}
-          {selectedResult && (
-            <div className="mt-4 p-4 bg-zinc-800 border border-zinc-700 rounded">
-              <h3 className="font-bold mb-2">Full Paragraph</h3>
-              <div
-                className="text-sm text-zinc-300"
-                dangerouslySetInnerHTML={{
-                  __html:
-                    selectedResult.highlight?.text?.[0] ??
-                    selectedResult._source.text,
-                }}
-              />
             </div>
           )}
         </div>
