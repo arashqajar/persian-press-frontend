@@ -33,12 +33,19 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-2">Pahlavi Persian Press</h2>
-      <p className="text-sm text-zinc-400 mb-6">
-        This archive is currently under construction. Functions are limited.
-      </p>
+    <main className="min-h-screen bg-zinc-900 text-white p-8">
+      {/* Title and description */}
+      <section className="mb-8 text-center">
+        <h1 className="text-4xl font-bold mb-2">Pahlavi Persian Press</h1>
+        <p className="text-base text-zinc-400">
+          This site is in development. Search functionality is limited.
+        </p>
+        <p className="text-base text-zinc-400 mt-1 text-right font-medium" dir="rtl">
+          این سایت در حال توسعه است. قابلیت جستجو محدود است.
+        </p>
+      </section>
 
+      {/* Search */}
       <div className="flex gap-4 mb-6">
         <input
           type="text"
@@ -57,7 +64,7 @@ export default function Home() {
 
       <div className="grid grid-cols-2 gap-8">
         <div>
-          <h2 className="text-xl mb-2">📄 Search Results</h2>
+          <h2 className="text-xl mb-2">📃 Search Results</h2>
           {results.length === 0 && <p>No results yet. Try a search above.</p>}
           {results.map((result, idx) => (
             <div
@@ -91,6 +98,6 @@ export default function Home() {
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 }
