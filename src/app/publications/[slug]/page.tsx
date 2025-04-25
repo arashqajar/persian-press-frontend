@@ -2,6 +2,16 @@ import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
+import { type Metadata, type ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } },
+  _parent: ResolvingMetadata
+): Promise<Metadata> {
+  return {
+    title: decodeURIComponent(params.slug),
+  };
+}
 
 const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   title,
@@ -14,7 +24,7 @@ const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   body
 }`;
 
-export default async function PublicationDetailPage({
+export default async function Page({
   params,
 }: {
   params: { slug: string };
