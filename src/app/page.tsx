@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type SearchHit = {
   _source: {
@@ -97,7 +98,14 @@ export default function Home() {
       {/* Sidebar */}
       <aside className="w-1/5 pr-6 border-r border-zinc-800 p-4">
         <div className="mb-8">
-          <img src="/pahlavi-logo.png" alt="Pahlavi Persian Press Logo" className="w-full mb-4" />
+          <Image
+            src="/pahlavi-logo.png"
+            alt="Pahlavi Persian Press Logo"
+            width={300}
+            height={100}
+            className="w-full h-auto mb-4 object-contain"
+            priority
+          />
           <input
             type="text"
             placeholder="Search..."
@@ -116,8 +124,6 @@ export default function Home() {
         <h3 className="text-zinc-400 text-sm font-medium mb-2">Publications</h3>
         <ul className="text-sm text-zinc-300 space-y-1">
           <li>Iranshahr</li>
-          <li>Kaveh</li>
-          <li>Payam-e Now</li>
         </ul>
       </aside>
 
