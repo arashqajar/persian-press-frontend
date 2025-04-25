@@ -4,7 +4,11 @@ import Image from "next/image";
 import { PortableText } from "@portabletext/react";
 import { notFound } from "next/navigation"; // ✅
 
-import { type PageProps } from "next"; // ✅
+type Props = {
+  params: {
+    slug: string;
+  };
+};
 
 const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   title,
@@ -17,7 +21,7 @@ const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   body
 }`;
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: Props) {
   const data = await client.fetch(query, { slug: params.slug });
 
   if (!data) {
