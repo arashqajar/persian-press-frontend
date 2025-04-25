@@ -2,19 +2,9 @@ import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
-import { Metadata } from "next";
+import { notFound } from "next/navigation"; // ✅
 
-type Props = {
-  params: {
-    slug: string;
-  };
-};
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return {
-    title: decodeURIComponent(params.slug),
-  };
-}
+import { type PageProps } from "next"; // ✅
 
 const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   title,
@@ -27,8 +17,12 @@ const query = groq`*[_type == "publication" && slug.current == $slug][0]{
   body
 }`;
 
-export default async function Page({ params }: Props) {
+export default async function Page({ params }: PageProps) {
   const data = await client.fetch(query, { slug: params.slug });
+
+  if (!data) {
+    notFound();
+  }
 
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-8">
