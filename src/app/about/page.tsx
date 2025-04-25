@@ -18,7 +18,13 @@ export default async function AboutPage() {
       <div className="flex gap-8">
         {/* Persian column */}
         <div className="w-1/2 text-right" dir="rtl">
-          <PortableText value={data?.body.filter(block => block.language === "fa") || []} />
+          <PortableText
+            value={
+              Array.isArray(data?.body)
+                ? data.body.filter((block: any) => block.language === "fa")
+                : []
+            }
+          />
         </div>
 
         {/* Divider */}
@@ -26,7 +32,13 @@ export default async function AboutPage() {
 
         {/* English column */}
         <div className="w-1/2">
-          <PortableText value={data?.body.filter(block => block.language !== "fa") || []} />
+          <PortableText
+            value={
+              Array.isArray(data?.body)
+                ? data.body.filter((block: any) => block.language !== "fa")
+                : []
+            }
+          />
         </div>
       </div>
 
