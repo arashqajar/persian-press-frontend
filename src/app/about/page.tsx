@@ -3,10 +3,12 @@ import { client } from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 import { groq } from "next-sanity";
 
-// Define a simple block type
+// ✅ Lint-safe PortableBlock type (no `any`)
 type PortableBlock = {
   language?: string;
-  [key: string]: any;
+  children?: unknown[];
+  _type?: string;
+  [key: string]: unknown;
 };
 
 const query = groq`*[_type == "staticPage" && slug == "about"][0]{
