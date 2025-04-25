@@ -95,7 +95,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-8 flex">
       {/* Sidebar */}
-      <aside className="w-1/4 pr-6 border-r border-zinc-800">
+      <aside className="w-1/5 pr-6 border-r border-zinc-800">
         <div className="mb-8">
           <img src="/logo-large.png" alt="Large Logo" className="w-32 mb-4" />
           <input
@@ -118,66 +118,74 @@ export default function Home() {
           <li>Iranshahr</li>
           <li>Kaveh</li>
           <li>Payam-e Now</li>
-          {/* TODO: Load dynamically later */}
         </ul>
       </aside>
 
-      {/* Main content area */}
-      <section className="w-3/4 pl-6">
-        <h2 className="text-2xl font-bold mb-4">🔍 Search Results</h2>
-        {results.length === 0 ? (
-          <p className="text-zinc-400">No results yet. Try a search above.</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-6">
-            {results.map((result, idx) => {
-              const textToShow =
-                result.highlight?.text?.[0] ?? result._source.text;
-              return (
-                <div
-                  key={idx}
-                  className="p-4 border border-zinc-700 rounded bg-zinc-800 cursor-pointer"
-                  onClick={() => {
-                    setSelectedResultIndex(idx);
-                    setCurrentPdfUrl(result._source.pdf_url || null);
-                  }}
-                >
-                  <div
-                    className="text-sm line-clamp-5"
-                    dangerouslySetInnerHTML={{ __html: textToShow }}
-                  />
-                  <p className="text-xs mt-2 text-zinc-400">
-                    {extractMetadata(result._source.gcs_path || "")}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
+      {/* Main and PDF preview side-by-side */}
+      <section className="w-4/5 pl-6 flex gap-6">
+        <div className="w-2/3">
+          <h2 className="text-2xl font-bold mb-4">🔍 Search Results</h2>
+          {results.length === 0 ? (
+            <p className="text-zinc-400">No results yet. Try a search above.</p>
+          ) : (
+            <div className="space-y-4">
+              {results.map((result, idx) => {
+                const isSelected = selectedResultIndex === idx;
+                const textToShow = isSelected
+                  ? result._source.text
+                  : result.highlight?.text?.[0] ?? result._source.text;
 
-        {currentPdfUrl && (
-          <div className="mt-8">
-            <h2 className="text-xl mb-2">📄 PDF Preview</h2>
-            <iframe
-              src={currentPdfUrl}
-              className="w-full h-[80vh] border border-zinc-700 rounded"
-              title="PDF Preview"
-            />
-            <div className="flex justify-between mt-2">
-              <button
-                onClick={() => navigatePdf(-1)}
-                className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-              >
-                ◀ Previous
-              </button>
-              <button
-                onClick={() => navigatePdf(1)}
-                className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-              >
-                Next ▶
-              </button>
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      setSelectedResultIndex(idx);
+                      setCurrentPdfUrl(result._source.pdf_url || null);
+                    }}
+                    className={`p-4 border rounded cursor-pointer bg-zinc-800 transition ${
+                      isSelected ? "border-blue-500" : "border-zinc-700 hover:border-blue-500"
+                    }`}
+                  >
+                    <div
+                      className="text-sm"
+                      dangerouslySetInnerHTML={{ __html: textToShow }}
+                    />
+                    <p className="text-sm mt-2 text-zinc-400">
+                      {extractMetadata(result._source.gcs_path || "")}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="w-1/3">
+          <h2 className="text-xl mb-2">📄 PDF Preview</h2>
+          {currentPdfUrl && (
+            <div>
+              <iframe
+                src={currentPdfUrl}
+                className="w-full h-[80vh] border border-zinc-700 rounded"
+                title="PDF Preview"
+              />
+              <div className="flex justify-between mt-2">
+                <button
+                  onClick={() => navigatePdf(-1)}
+                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+                >
+                  ◀ Previous
+                </button>
+                <button
+                  onClick={() => navigatePdf(1)}
+                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+                >
+                  Next ▶
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
     </main>
   );
