@@ -3,23 +3,20 @@ import { groq } from "next-sanity";
 import Image from "next/image";
 import Link from "next/link";
 
+// Define a type for publication
 type Publication = {
   _id: string;
   title: string;
   slug: { current: string };
-  coverImage?: { asset: { url: string } };
-  description?: any; // you can replace with PortableTextBlock[] if you want
+  coverImage: { asset: { url: string } };
+  description: string;
 };
 
 const query = groq`*[_type == "publication"]{
   _id,
   title,
   slug,
-  coverImage {
-    asset -> {
-      url
-    }
-  },
+  coverImage,
   description
 }`;
 
@@ -40,7 +37,7 @@ export default async function PublicationsPage() {
               className="flex overflow-hidden bg-zinc-800 rounded shadow hover:bg-zinc-700 transition-all"
               style={{ height: "25vh", cursor: "pointer" }}
             >
-              {pub.coverImage?.asset?.url && (
+              {pub.coverImage && (
                 <div className="w-1/4 relative">
                   <Image
                     src={pub.coverImage.asset.url}
@@ -52,12 +49,7 @@ export default async function PublicationsPage() {
               )}
               <div className="p-4 w-3/4 overflow-hidden">
                 <h2 className="text-2xl font-semibold mb-2">{pub.title}</h2>
-                <p className="text-sm text-zinc-300 line-clamp-5">
-                  {/* Optional chaining just in case */}
-                  {typeof pub.description === "string"
-                    ? pub.description
-                    : "Click to read more"}
-                </p>
+                <p className="text-sm text-zinc-300 line-clamp-5">{pub.description}</p>
               </div>
             </div>
           </Link>
