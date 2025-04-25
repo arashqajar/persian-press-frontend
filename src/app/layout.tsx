@@ -28,11 +28,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-900 text-white`}
       >
         <header className="flex justify-between items-center p-4 border-b border-zinc-700">
-          <h1 className="text-xl font-bold">📰 Pahlavi Persian Press</h1>
+          <div className="flex items-center gap-2">
+            <img src="/pahlavi-logo.png" alt="Logo" className="w-6 h-6" />
+            <h1 className="text-xl font-bold">Pahlavi Persian Press</h1>
+          </div>
           <nav className="flex gap-6 text-sm text-zinc-300">
             <a href="/about">About</a>
             <a href="/help">Help</a>
-            <a href="/publication">Publication Titles</a>
+            <a href="/publications">Publication Titles</a>
             <a href="/contact">Contact</a>
           </nav>
         </header>
