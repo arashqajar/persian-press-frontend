@@ -2,8 +2,30 @@
 
 import { useEffect, useState } from "react";
 
-// Define the SearchHit type
-// ... (unchanged code here)
+type SearchHit = {
+  _source: {
+    text: string;
+    publication: string;
+    issue_folder: string;
+    page_number: string;
+    pdf_url?: string;
+    pdf_path?: string;
+    gcs_path?: string;
+  };
+  highlight?: {
+    text?: string[];
+  };
+};
+
+function getNextPdfUrl(currentPath: string, offset: number): string | null {
+  const match = currentPath.match(/(.+\/)(\d+)\.pdf$/);
+  if (!match) return null;
+
+  const folder = match[1];
+  const currentPage = parseInt(match[2], 10);
+  const nextPage = currentPage + offset;
+  return `${folder}${nextPage}.pdf`;
+}
 
 export default function Home() {
   const [query, setQuery] = useState("");
