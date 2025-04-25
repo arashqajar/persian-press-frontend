@@ -1,20 +1,50 @@
 import { client } from "@/sanity/lib/client";
-import { PortableText } from "@portabletext/react";
 import { groq } from "next-sanity";
+import Image from "next/image";
+import Link from "next/link";
 
-const query = groq`*[_type == "staticPage" && slug == "publications"][0]{
+const query = groq`*[_type == "publication"]{
+  _id,
   title,
-  body
+  slug,
+  coverImage,
+  description
 }`;
 
 export default async function PublicationsPage() {
-  const data = await client.fetch(query);
+  const publications = await client.fetch(query);
 
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-4">{data?.title}</h1>
-      <div className="prose prose-invert max-w-none">
-        <PortableText value={data?.body} />
+      <h1 className="text-4xl font-bold mb-8">Publications</h1>
+      <div className="space-y-6">
+        {publications.map((pub: any) => (
+          <Link
+            key={pub._id}
+            href={`/publications/${pub.slug.current}`}
+            className="block"
+          >
+            <div
+              className="flex overflow-hidden bg-zinc-800 rounded shadow hover:bg-zinc-700 transition-all"
+              style={{ height: "25vh", cursor: "pointer" }}
+            >
+              {pub.coverImage && (
+                <div className="w-1/4 relative">
+                  <Image
+                    src={pub.coverImage.asset.url}
+                    alt={pub.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-4 w-3/4 overflow-hidden">
+                <h2 className="text-2xl font-semibold mb-2">{pub.title}</h2>
+                <p className="text-sm text-zinc-300 line-clamp-5">{pub.description}</p>
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </main>
   );

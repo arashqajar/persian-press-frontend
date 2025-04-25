@@ -23,7 +23,7 @@ export default defineType({
       validation: Rule => Rule.required(),
     },
     {
-      name: "cover",
+      name: "coverImage",
       title: "Cover Image",
       type: "image",
       options: {
