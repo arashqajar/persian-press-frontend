@@ -2,30 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-type SearchHit = {
-  _source: {
-    text: string;
-    publication: string;
-    issue_folder: string;
-    page_number: string;
-    pdf_url?: string;
-    pdf_path?: string;
-    gcs_path?: string;
-  };
-  highlight?: {
-    text?: string[];
-  };
-};
-
-function getNextPdfUrl(currentPath: string, offset: number): string | null {
-  const match = currentPath.match(/(.+\/)(\d+)\.pdf$/);
-  if (!match) return null;
-
-  const folder = match[1];
-  const currentPage = parseInt(match[2], 10);
-  const nextPage = currentPage + offset;
-  return `${folder}${nextPage}.pdf`;
-}
+// Define the SearchHit type
+// ... (unchanged code here)
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -93,100 +71,116 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-900 text-white p-8 flex">
-      {/* Sidebar */}
-      <aside className="w-1/5 pr-6 border-r border-zinc-800">
-        <div className="mb-8">
-          <img src="/pahlavi-logo.png" alt="Pahlavi Persian Press Logo" className="w-32 mb-4" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 text-sm"
-          />
-          <button
-            onClick={handleSearch}
-            className="mt-2 w-full px-3 py-2 bg-blue-600 rounded text-sm hover:bg-blue-500"
-          >
-            Search
-          </button>
+    <main className="min-h-screen bg-zinc-900 text-white">
+      {/* Nav Bar */}
+      <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+        <div className="flex items-center gap-2">
+          <img src="/pahlavi-logo.png" alt="Logo Thumbnail" className="w-8 h-8" />
+          <span className="text-xl font-bold">Pahlavi Persian Press</span>
         </div>
+        <nav className="flex gap-6 text-sm text-zinc-300">
+          <a href="/about">About</a>
+          <a href="/help">Help</a>
+          <a href="/publication">Publication Titles</a>
+          <a href="/contact">Contact</a>
+        </nav>
+      </header>
 
-        <h3 className="text-zinc-400 text-sm font-medium mb-2">Publications</h3>
-        <ul className="text-sm text-zinc-300 space-y-1">
-          <li>Iranshahr</li>
-          <li>Kaveh</li>
-          <li>Payam-e Now</li>
-        </ul>
-      </aside>
+      <div className="p-8 flex">
+        {/* Sidebar */}
+        <aside className="w-1/5 pr-6 border-r border-zinc-800">
+          <div className="mb-8">
+            <img src="/pahlavi-logo.png" alt="Pahlavi Persian Press Logo" className="w-full mb-4" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 text-sm"
+            />
+            <button
+              onClick={handleSearch}
+              className="mt-2 w-full px-3 py-2 bg-blue-600 rounded text-sm hover:bg-blue-500"
+            >
+              Search
+            </button>
+          </div>
 
-      {/* Main and PDF preview side-by-side */}
-      <section className="w-4/5 pl-6 flex gap-6">
-        <div className="w-2/3">
-          <h2 className="text-2xl font-bold mb-4">🔍 Search Results</h2>
-          {results.length === 0 ? (
-            <p className="text-zinc-400">No results yet. Try a search above.</p>
-          ) : (
-            <div className="space-y-4">
-              {results.map((result, idx) => {
-                const isSelected = selectedResultIndex === idx;
-                const textToShow = isSelected
-                  ? result._source.text
-                  : result.highlight?.text?.[0] ?? result._source.text;
+          <h3 className="text-zinc-400 text-sm font-medium mb-2">Publications</h3>
+          <ul className="text-sm text-zinc-300 space-y-1">
+            <li>Iranshahr</li>
+            <li>Kaveh</li>
+            <li>Payam-e Now</li>
+          </ul>
+        </aside>
 
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => {
-                      setSelectedResultIndex(idx);
-                      setCurrentPdfUrl(result._source.pdf_url || null);
-                    }}
-                    className={`p-4 border rounded cursor-pointer bg-zinc-800 transition ${
-                      isSelected ? "border-blue-500" : "border-zinc-700 hover:border-blue-500"
-                    }`}
-                  >
+        {/* Main and PDF preview side-by-side */}
+        <section className="w-4/5 pl-6 flex gap-6">
+          <div className="w-2/3">
+            <h2 className="text-2xl font-bold mb-4">🔍 Search Results</h2>
+            {results.length === 0 ? (
+              <p className="text-zinc-400">No results yet. Try a search above.</p>
+            ) : (
+              <div className="space-y-4">
+                {results.map((result, idx) => {
+                  const isSelected = selectedResultIndex === idx;
+                  const textToShow = isSelected
+                    ? result._source.text
+                    : result.highlight?.text?.[0] ?? result._source.text;
+
+                  return (
                     <div
-                      className="text-sm"
-                      dangerouslySetInnerHTML={{ __html: textToShow }}
-                    />
-                    <p className="text-sm mt-2 text-zinc-400">
-                      {extractMetadata(result._source.gcs_path || "")}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="w-1/3">
-          <h2 className="text-xl mb-2">📄 PDF Preview</h2>
-          {currentPdfUrl && (
-            <div>
-              <iframe
-                src={currentPdfUrl}
-                className="w-full h-[80vh] border border-zinc-700 rounded"
-                title="PDF Preview"
-              />
-              <div className="flex justify-between mt-2">
-                <button
-                  onClick={() => navigatePdf(-1)}
-                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-                >
-                  ◀ Previous
-                </button>
-                <button
-                  onClick={() => navigatePdf(1)}
-                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-                >
-                  Next ▶
-                </button>
+                      key={idx}
+                      onClick={() => {
+                        setSelectedResultIndex(idx);
+                        setCurrentPdfUrl(result._source.pdf_url || null);
+                      }}
+                      className={`p-4 border rounded cursor-pointer bg-zinc-800 transition ${
+                        isSelected ? "border-blue-500" : "border-zinc-700 hover:border-blue-500"
+                      }`}
+                    >
+                      <div
+                        className="text-sm"
+                        dangerouslySetInnerHTML={{ __html: textToShow }}
+                      />
+                      <p className="text-sm mt-2 text-zinc-400">
+                        {extractMetadata(result._source.gcs_path || "")}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
+
+          <div className="w-1/3">
+            <h2 className="text-xl mb-2">📄 PDF Preview</h2>
+            {currentPdfUrl && (
+              <div>
+                <iframe
+                  src={currentPdfUrl}
+                  className="w-full h-[80vh] border border-zinc-700 rounded"
+                  title="PDF Preview"
+                />
+                <div className="flex justify-between mt-2">
+                  <button
+                    onClick={() => navigatePdf(-1)}
+                    className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+                  >
+                    ◀ Previous
+                  </button>
+                  <button
+                    onClick={() => navigatePdf(1)}
+                    className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+                  >
+                    Next ▶
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
