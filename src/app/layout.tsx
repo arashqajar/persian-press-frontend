@@ -31,8 +31,9 @@ export default function RootLayout({
           <h1 className="text-xl font-bold">📰 Pahlavi Persian Press</h1>
           <nav className="flex gap-6 text-sm text-zinc-300">
             <a href="/about">About</a>
-            <a href="#">Help</a>
-            <a href="#">Publication Titles</a>
+            <a href="/help">Help</a>
+            <a href="/publication">Publication Titles</a>
+            <a href="/contact">Contact</a>
           </nav>
         </header>
         <main className="p-4">{children}</main>
