@@ -1,7 +1,8 @@
-import staticPage from './staticPage'
-import publication from './publication' // ✅ import your new schema
+// src/sanity/schemaTypes/index.ts
 
-export const schema = {
-  types: [staticPage, publication],
-};
+import staticPage from "./staticPage";
+import publication from "./publication";
 
+const schemaTypes = [staticPage, publication];
+
+export default schemaTypes;
