@@ -6,15 +6,9 @@ import Link from "next/link";
 type Publication = {
   _id: string;
   title: string;
-  slug: {
-    current: string;
-  };
-  coverImage?: {
-    asset: {
-      url: string;
-    };
-  };
-  description?: string;
+  slug: { current: string };
+  coverImage?: { asset: { url: string } };
+  description?: any; // you can replace with PortableTextBlock[] if you want
 };
 
 const query = groq`*[_type == "publication"]{
@@ -22,7 +16,7 @@ const query = groq`*[_type == "publication"]{
   title,
   slug,
   coverImage {
-    asset->{
+    asset -> {
       url
     }
   },
@@ -59,7 +53,10 @@ export default async function PublicationsPage() {
               <div className="p-4 w-3/4 overflow-hidden">
                 <h2 className="text-2xl font-semibold mb-2">{pub.title}</h2>
                 <p className="text-sm text-zinc-300 line-clamp-5">
-                  {pub.description}
+                  {/* Optional chaining just in case */}
+                  {typeof pub.description === "string"
+                    ? pub.description
+                    : "Click to read more"}
                 </p>
               </div>
             </div>
