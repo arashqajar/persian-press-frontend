@@ -1,6 +1,4 @@
-import { type SchemaTypeDefinition } from 'sanity'
 import staticPage from './staticPage'
+import publication from './publication' // ✅ import your new schema
 
-export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [staticPage],
-}
+export const schemaTypes = [staticPage, publication]
