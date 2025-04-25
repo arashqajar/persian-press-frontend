@@ -29,7 +29,7 @@ export default function RootLayout({
       >
         <header className="flex justify-between items-center p-4 border-b border-zinc-700">
           <div className="flex items-center gap-2">
-            <img src="/pahlavi-logo.png" alt="Logo" className="w-6 h-6" />
+            <img src="/pahlavi-image.pngg" alt="Logo" className="w-6 h-6" />
             <h1 className="text-xl font-bold">Pahlavi Persian Press</h1>
           </div>
           <nav className="flex gap-6 text-sm text-zinc-300">
