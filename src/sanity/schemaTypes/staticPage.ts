@@ -21,7 +21,25 @@ export default defineType({
       name: 'body',
       title: 'Content',
       type: 'array',
-      of: [{ type: 'block' }],
+      of: [
+        {
+          type: 'block',
+          fields: [
+            {
+              name: 'language',
+              title: 'Language',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'English', value: 'en' },
+                  { title: 'Persian', value: 'fa' },
+                ],
+                layout: 'radio',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
 })
