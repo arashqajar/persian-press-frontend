@@ -2,11 +2,10 @@ import { client } from "@/sanity/lib/client";
 import { groq } from "next-sanity";
 import Image from "next/image";
 import { PortableText } from "@portabletext/react";
-import { type Metadata, type ResolvingMetadata } from "next";
+import { type Metadata } from "next";
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } },
-  _parent: ResolvingMetadata
+  { params }: { params: { slug: string } }
 ): Promise<Metadata> {
   return {
     title: decodeURIComponent(params.slug),
