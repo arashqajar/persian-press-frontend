@@ -3,11 +3,11 @@ import { client } from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 import { groq } from "next-sanity";
 
-// ✅ Lint-safe PortableBlock type (no `any`)
+// ✅ Strict and safe PortableBlock type
 type PortableBlock = {
+  _type: string;
   language?: string;
   children?: unknown[];
-  _type?: string;
   [key: string]: unknown;
 };
 
@@ -19,13 +19,10 @@ const query = groq`*[_type == "staticPage" && slug == "about"][0]{
 export default async function AboutPage() {
   const data = await client.fetch(query);
 
-  const persianBlocks = (data?.body as PortableBlock[]).filter(
-    (block) => block.language === "fa"
-  );
+  const blocks = data?.body as PortableBlock[] || [];
 
-  const englishBlocks = (data?.body as PortableBlock[]).filter(
-    (block) => block.language !== "fa"
-  );
+  const persianBlocks = blocks.filter((block) => block.language === "fa");
+  const englishBlocks = blocks.filter((block) => block.language !== "fa");
 
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-12">
