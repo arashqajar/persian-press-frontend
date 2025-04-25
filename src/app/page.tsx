@@ -97,7 +97,7 @@ export default function Home() {
       {/* Sidebar */}
       <aside className="w-1/5 pr-6 border-r border-zinc-800">
         <div className="mb-8">
-          <img src="/logo-large.png" alt="Large Logo" className="w-32 mb-4" />
+          <img src="/pahlavi-logo.png" alt="Pahlavi Persian Press Logo" className="w-32 mb-4" />
           <input
             type="text"
             placeholder="Search..."
