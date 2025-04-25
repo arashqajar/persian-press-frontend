@@ -10,7 +10,7 @@ type SearchHit = {
     page_number: string;
     pdf_url?: string;
     pdf_path?: string;
-    gcs_path?: string; // ✅ Fix: added this line
+    gcs_path?: string;
   };
   highlight?: {
     text?: string[];
@@ -93,93 +93,92 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-900 text-white p-8">
-      <section className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2">Pahlavi Persian Press</h1>
-        <p className="text-base text-zinc-400">
-          This site is in development. Search functionality is limited.
-        </p>
-        <p className="text-base text-zinc-400 mt-1 text-right font-medium" dir="rtl">
-          این سایت در حال توسعه است. قابلیت جستجو محدود است.
-        </p>
-      </section>
+    <main className="min-h-screen bg-zinc-900 text-white p-8 flex">
+      {/* Sidebar */}
+      <aside className="w-1/4 pr-6 border-r border-zinc-800">
+        <div className="mb-8">
+          <img src="/logo-large.png" alt="Large Logo" className="w-32 mb-4" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full p-2 rounded bg-zinc-800 border border-zinc-700 text-sm"
+          />
+          <button
+            onClick={handleSearch}
+            className="mt-2 w-full px-3 py-2 bg-blue-600 rounded text-sm hover:bg-blue-500"
+          >
+            Search
+          </button>
+        </div>
 
-      <div className="flex gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Type a word in Persian..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full p-3 rounded bg-zinc-800 border border-zinc-700"
-        />
-        <button
-          onClick={handleSearch}
-          className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
-        >
-          Search
-        </button>
-      </div>
+        <h3 className="text-zinc-400 text-sm font-medium mb-2">Publications</h3>
+        <ul className="text-sm text-zinc-300 space-y-1">
+          <li>Iranshahr</li>
+          <li>Kaveh</li>
+          <li>Payam-e Now</li>
+          {/* TODO: Load dynamically later */}
+        </ul>
+      </aside>
 
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-xl mb-2">📃 Search Results</h2>
-          {results.length === 0 && <p>No results yet. Try a search above.</p>}
-          {results.map((result, idx) => {
-            const isSelected = selectedResultIndex === idx;
-            const textToShow = isSelected
-              ? result._source.text
-              : result.highlight?.text?.[0] ?? result._source.text;
-
-            return (
-              <div
-                key={idx}
-                onClick={() => {
-                  setSelectedResultIndex(idx);
-                  setCurrentPdfUrl(result._source.pdf_url || null);
-                }}
-                className={`mb-4 p-4 border rounded cursor-pointer bg-zinc-800 transition ${
-                  isSelected ? "border-blue-500" : "border-zinc-700 hover:border-blue-500"
-                }`}
-              >
+      {/* Main content area */}
+      <section className="w-3/4 pl-6">
+        <h2 className="text-2xl font-bold mb-4">🔍 Search Results</h2>
+        {results.length === 0 ? (
+          <p className="text-zinc-400">No results yet. Try a search above.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-6">
+            {results.map((result, idx) => {
+              const textToShow =
+                result.highlight?.text?.[0] ?? result._source.text;
+              return (
                 <div
-                  className="text-sm"
-                  dangerouslySetInnerHTML={{ __html: textToShow }}
-                />
-                <p className="text-sm mt-2 text-zinc-400">
-                  {extractMetadata(result._source.gcs_path || "")}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+                  key={idx}
+                  className="p-4 border border-zinc-700 rounded bg-zinc-800 cursor-pointer"
+                  onClick={() => {
+                    setSelectedResultIndex(idx);
+                    setCurrentPdfUrl(result._source.pdf_url || null);
+                  }}
+                >
+                  <div
+                    className="text-sm line-clamp-5"
+                    dangerouslySetInnerHTML={{ __html: textToShow }}
+                  />
+                  <p className="text-xs mt-2 text-zinc-400">
+                    {extractMetadata(result._source.gcs_path || "")}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-        <div>
-          <h2 className="text-xl mb-2">📄 PDF Preview</h2>
-          {currentPdfUrl && (
-            <div>
-              <iframe
-                src={currentPdfUrl}
-                className="w-full h-[80vh] border border-zinc-700 rounded"
-                title="PDF Preview"
-              />
-              <div className="flex justify-between mt-2">
-                <button
-                  onClick={() => navigatePdf(-1)}
-                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-                >
-                  ◀ Previous
-                </button>
-                <button
-                  onClick={() => navigatePdf(1)}
-                  className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
-                >
-                  Next ▶
-                </button>
-              </div>
+        {currentPdfUrl && (
+          <div className="mt-8">
+            <h2 className="text-xl mb-2">📄 PDF Preview</h2>
+            <iframe
+              src={currentPdfUrl}
+              className="w-full h-[80vh] border border-zinc-700 rounded"
+              title="PDF Preview"
+            />
+            <div className="flex justify-between mt-2">
+              <button
+                onClick={() => navigatePdf(-1)}
+                className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+              >
+                ◀ Previous
+              </button>
+              <button
+                onClick={() => navigatePdf(1)}
+                className="px-4 py-1 bg-zinc-700 hover:bg-zinc-600 rounded"
+              >
+                Next ▶
+              </button>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }
