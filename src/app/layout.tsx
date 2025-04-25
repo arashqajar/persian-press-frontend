@@ -1,3 +1,4 @@
+import Link from "next/link"; // ✅ at the top
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -33,10 +34,10 @@ export default function RootLayout({
             <h1 className="text-xl font-bold">Pahlavi Persian Press</h1>
           </div>
           <nav className="flex gap-6 text-sm text-zinc-300">
-            <a href="/about">About</a>
-            <a href="/help">Help</a>
-            <a href="/publications">Publication Titles</a>
-            <a href="/contact">Contact</a>
+            <Link href="/about">About</Link>
+            <Link href="/help">Help</Link>
+            <Link href="/publications">Publication Titles</Link>
+            <Link href="/contact">Contact</Link>
           </nav>
         </header>
         <main className="p-4">{children}</main>
