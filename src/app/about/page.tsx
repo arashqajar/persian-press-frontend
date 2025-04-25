@@ -3,6 +3,12 @@ import { client } from "@/sanity/lib/client";
 import { PortableText } from "@portabletext/react";
 import { groq } from "next-sanity";
 
+// Define a simple block type
+type PortableBlock = {
+  language?: string;
+  [key: string]: any;
+};
+
 const query = groq`*[_type == "staticPage" && slug == "about"][0]{
   title,
   body
@@ -11,6 +17,14 @@ const query = groq`*[_type == "staticPage" && slug == "about"][0]{
 export default async function AboutPage() {
   const data = await client.fetch(query);
 
+  const persianBlocks = (data?.body as PortableBlock[]).filter(
+    (block) => block.language === "fa"
+  );
+
+  const englishBlocks = (data?.body as PortableBlock[]).filter(
+    (block) => block.language !== "fa"
+  );
+
   return (
     <main className="min-h-screen bg-zinc-900 text-white p-12">
       <h1 className="text-4xl font-bold text-center mb-12">{data?.title}</h1>
@@ -18,13 +32,7 @@ export default async function AboutPage() {
       <div className="flex gap-8">
         {/* Persian column */}
         <div className="w-1/2 text-right" dir="rtl">
-          <PortableText
-            value={
-              Array.isArray(data?.body)
-                ? data.body.filter((block: any) => block.language === "fa")
-                : []
-            }
-          />
+          <PortableText value={persianBlocks} />
         </div>
 
         {/* Divider */}
@@ -32,13 +40,7 @@ export default async function AboutPage() {
 
         {/* English column */}
         <div className="w-1/2">
-          <PortableText
-            value={
-              Array.isArray(data?.body)
-                ? data.body.filter((block: any) => block.language !== "fa")
-                : []
-            }
-          />
+          <PortableText value={englishBlocks} />
         </div>
       </div>
 
