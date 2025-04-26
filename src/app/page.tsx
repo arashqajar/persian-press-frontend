@@ -38,7 +38,7 @@ export default function Home() {
     const runDefaultSearch = async () => {
       const defaultQuery = "رادیو";
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/search?query=${encodeURIComponent(defaultQuery)}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(defaultQuery)}`
       );
       const data = await res.json();
       setQuery(defaultQuery);
@@ -55,7 +55,7 @@ export default function Home() {
     setSelectedResultIndex(null);
     setCurrentPdfUrl(null);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/search?query=${encodeURIComponent(query)}`
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/search?query=${encodeURIComponent(query)}`
     );
     const data = await res.json();
     setResults(data);
@@ -74,7 +74,7 @@ export default function Home() {
     const nextPath = getNextPdfUrl(results[selectedResultIndex]._source.pdf_path!, offset);
     if (nextPath) {
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/signed-url?blob_name=${encodeURIComponent(nextPath)}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/signed-url?blob_name=${encodeURIComponent(nextPath)}`
       )
         .then((res) => res.json())
         .then((data) => {
